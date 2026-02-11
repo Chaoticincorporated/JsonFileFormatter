@@ -32,6 +32,7 @@ class DataGroupings {
 public:
 	DataGroupings();
 	~DataGroupings();
+	int countNodesInGroup();
 private:
 	NodeBase* firstNode;
 };
@@ -56,4 +57,14 @@ private:
 };
 struct ArrayNode : public NodeBase  {
 	ArrayBody arrayData;
+};
+
+class Formatter {
+public:
+	Formatter();
+	~Formatter();
+
+	void formatData(ostream&);
+private:
+	DataGroupings fileBase;
 };
