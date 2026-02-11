@@ -14,25 +14,24 @@ struct NodeBase {
 	string nodeType;
 	bool primeForFileData;
 	NodeBase* link;
-};
-struct IntNode : public NodeBase {
+	ArrayBody arrayData;
+	ObjectBody objectData;
 	int intData;
-};
-struct StringNode : public NodeBase {
 	string stringData;
-};
-struct DoubleNode : public NodeBase {
 	double doubleDate;
-};
-struct CharNode : public NodeBase {
-	char charData;
 };
 
 class DataGroupings {
 public:
 	DataGroupings();
 	~DataGroupings();
-	int countNodesInGroup();
+	void initializeFile();
+	void deleteGrouping(NodeBase*);
+	int countNodesInGroup(NodeBase*);
+	void createStructureForArray(bool);
+	void createStructureForObject(bool);
+	void formatData(ostream&);
+	void formatData(ostream&, istream&);
 private:
 	NodeBase* firstNode;
 };
@@ -41,30 +40,14 @@ class ObjectBody : public DataGroupings {
 public:
 	ObjectBody();
 	~ObjectBody();
-	void addNode(string /*name*/, string /*nodeType*/, bool /*primeForFileData*/);
+	NodeBase addNode(string /*name*/, string /*nodeType*/, bool /*primeForFileData*/);
 private:
-};
-struct ObjectNode : public NodeBase {
-	ObjectBody objectData;
 };
 
 class ArrayBody : public DataGroupings {
 public:
 	ArrayBody();
 	~ArrayBody();
-	void addNode(string /*nodeType*/, bool /*primeForFileData*/);
+	NodeBase addNode(string /*nodeType*/);
 private:
-};
-struct ArrayNode : public NodeBase  {
-	ArrayBody arrayData;
-};
-
-class Formatter {
-public:
-	Formatter();
-	~Formatter();
-
-	void formatData(ostream&);
-private:
-	DataGroupings fileBase;
 };
