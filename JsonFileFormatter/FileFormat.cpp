@@ -94,12 +94,7 @@ string validateFileBase()
 //base DataGroupings class
 DataGroupings::DataGroupings()
 {
-	string fileBase = validateFileBase();
-	firstNode = new NodeBase;
-	if (fileBase == "array")
-		firstNode->arrayData = ArrayBody();
-	else
-		firstNode->objectData = ObjectBody();
+	firstNode = NULL;
 }
 void DataGroupings::deleteGrouping(NodeBase* walker)
 {
@@ -134,52 +129,106 @@ int DataGroupings::countNodesInGroup(NodeBase* walker)
 	}
 	return totalNodes;
 }
-void DataGroupings::createStructureForArray(bool isStartOfFile)
+void DataGroupings::createStructureForArray(bool isStartOfFile, int layer)
 {
 	NodeBase* walker = firstNode;
-	NodeBase* stalker = NULL;
-
-	string nodeType;
 	bool inputingData;
 	do
 	{
-		nodeType = validateNodeType();
-		
+		NodeBase* builder = new NodeBase; 
+		builder->nodeType = validateNodeType();
+		builder->dataDepth = layer + 1;
+		builder->link = NULL;
+		if (builder->nodeType == "array" || builder->nodeType == "object")
+		{
+			builder->dataGroups = DataGroupings();
+			bool populateGrouping = booleanInput("Would you like to populate this data grouping?");
+			if (populateGrouping && builder->nodeType == "array")
+				builder->dataGroups.createStructureForArray(false, builder->dataDepth);
+			else if (populateGrouping)
+				builder->dataGroups.createStructureForObject(false, builder->dataDepth);
+		}
+
+		if (firstNode == NULL)
+			firstNode = builder;
+		else
+		{
+			walker->link = builder;
+			walker = walker->link;
+		}
 
 		if (isStartOfFile)
 			inputingData = booleanInput("Would you like to add another value to this array?");
 	} while (inputingData);
 }
-void DataGroupings::createStructureForObject(bool isStartOfFile)
+void DataGroupings::createStructureForObject(bool isStartOfFile, int layer)
 {
-	string name, nodeType;
-	bool primeForFileData, inputingData = false;
+	NodeBase* walker = firstNode;
+	bool inputingData = false;
 	do
 	{
-		nodeType = validateNodeType();
-		primeForFileData = booleanInput("Will this member be populated via a file?");
+		NodeBase* builder = new NodeBase;
+		builder->nodeType = validateNodeType();
+		builder->dataDepth = layer + 1;
+		builder->link = NULL;
+
+		builder->primeForFileData = booleanInput("Will this member be populated via a file?");
 		cout << "what would you like to name this member: ";
 		cin.ignore(80, '\n');
-		getline(cin, name);
+		getline(cin, builder->name);
+
+		if (builder->nodeType == "array" || builder->nodeType == "object")
+		{
+			builder->dataGroups = DataGroupings();
+			bool populateGrouping = booleanInput("Would you like to populate this data grouping?");
+			if (populateGrouping && builder->nodeType == "array")
+				builder->dataGroups.createStructureForArray(false, builder->dataDepth);
+			else if (populateGrouping)
+				builder->dataGroups.createStructureForObject(false, builder->dataDepth);
+		}
+
+		if (firstNode == NULL)
+			firstNode = builder;
+		else
+		{
+			walker->link = builder;
+			walker = walker->link;
+		}
 
 		if(isStartOfFile)
 			inputingData = booleanInput("Would you like to add another member to this object?");
 	} while (inputingData);
 }
 
+
+
+//Formatter class
+Formatter::Formatter()
+{
+	
+	fileBase = new NodeBase;
+	fileBase->dataDepth = 0;
+	fileBase->nodeType = validateFileBase();
+	fileBase->dataGroups = DataGroupings();
+}
+Formatter::~Formatter()
+{
+	delete fileBase;
+}
+
+/*
+if (baseType == "array")
+		fileBase->dataGroups;
+	else
+		fileBase->objectData = ObjectBody();
+*/
+
+/*
 //derived ObjectBody class
 ObjectBody::ObjectBody() : DataGroupings() {}
 ObjectBody::~ObjectBody() {}
-NodeBase ObjectBody::addNode(string name, string nodeType, bool primeForFileData)
-{
-
-}
 
 //derived ArrayBody class
 ArrayBody::ArrayBody() : DataGroupings() {}
 ArrayBody::~ArrayBody() {}
-NodeBase ArrayBody::addNode(string nodeType)
-{
-
-}
-
+*/
